@@ -2,8 +2,9 @@ bin
 include
 lib
 .Python
-tests/
+# tests/
 .envrc
 __pycache__
 pyvenv.cfg
 .flake8
+plan_de_test.pages
