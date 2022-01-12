@@ -26,9 +26,13 @@ def index():
     return render_template("index.html")
 
 
+@app.errorhandler(404)
 @app.route("/showSummary", methods=["POST"])
 def showSummary():
-    club = [club for club in clubs if club["email"] == request.form["email"]][0]
+    try:
+        club = [club for club in clubs if club["email"] == request.form["email"]][0]
+    except IndexError:
+        return render_template("index.html", error="unknown_email"), 404
     return render_template("welcome.html", club=club, competitions=competitions)
 
 
