@@ -32,7 +32,7 @@ def showSummary():
     try:
         club = [club for club in clubs if club["email"] == request.form["email"]][0]
     except IndexError:
-        return render_template("index.html", error="unknown_email"), 404
+        return render_template("index.html", error="Unknown Email"), 404
     return render_template("welcome.html", club=club, competitions=competitions)
 
 
