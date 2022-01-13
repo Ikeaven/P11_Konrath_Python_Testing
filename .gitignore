@@ -8,3 +8,4 @@ __pycache__
 pyvenv.cfg
 .flake8
 plan_de_test.pages
+pyproject.toml
