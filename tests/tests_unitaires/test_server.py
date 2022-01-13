@@ -60,3 +60,32 @@ def test_purchasePlaces_book_more_than_clubs_point_or_competition_places(
     expected_data = "Error : Too much places booked"
     assert response.status_code == 403
     assert expected_data in data
+
+
+def test_purchasePlaces_book_negative_place(client, mocker):
+    mocker.patch.object(
+        server,
+        "clubs",
+        [{"name": "test_club", "email": "test@gmail.com", "points": 5}],
+    )
+    mocker.patch.object(
+        server,
+        "competitions",
+        [
+            {
+                "name": "test_festival",
+                "date": "2020-03-27 10:00:00",
+                "numberOfPlaces": 5,
+            }
+        ],
+    )
+    response = client.post(
+        "/purchasePlaces",
+        data={"competition": "test_festival", "club": "test_club", "places": "-3"},
+    )
+    data = response.data.decode()
+    expected_value_club = "Points available: 2"
+    expected_value_competition = "Number of Places: 2"
+    assert response.status_code == 200
+    assert expected_value_club in data
+    assert expected_value_competition in data
