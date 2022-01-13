@@ -47,12 +47,18 @@ def book(competition, club):
         return render_template("welcome.html", club=club, competitions=competitions)
 
 
+@app.errorhandler(400)
 @app.errorhandler(403)
 @app.route("/purchasePlaces", methods=["POST"])
 def purchasePlaces():
     competition = [c for c in competitions if c["name"] == request.form["competition"]][0]
     club = [c for c in clubs if c["name"] == request.form["club"]][0]
-    placesRequired = abs(int(request.form["places"]))
+    try:
+        placesRequired = abs(int(request.form["places"]))
+    except ValueError:
+        flash("Bad request : number of place must be an integer !")
+        return render_template("welcome.html", club=club, competitions=competitions), 400
+
     if placesRequired <= int(club["points"]) and placesRequired <= int(competition["numberOfPlaces"]):
         competition["numberOfPlaces"] = int(competition["numberOfPlaces"]) - placesRequired
         club["points"] = int(club["points"]) - placesRequired

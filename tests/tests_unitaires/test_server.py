@@ -89,3 +89,34 @@ def test_purchasePlaces_book_negative_place(client, mocker):
     assert response.status_code == 200
     assert expected_value_club in data
     assert expected_value_competition in data
+
+
+def test_purchasePlace_without_data(client, mocker):
+    mocker.patch.object(
+        server,
+        "clubs",
+        [{"name": "test_club", "email": "test@gmail.com", "points": 5}],
+    )
+    mocker.patch.object(
+        server,
+        "competitions",
+        [
+            {
+                "name": "test_festival",
+                "date": "2020-03-27 10:00:00",
+                "numberOfPlaces": 6,
+            }
+        ],
+    )
+    response = client.post(
+        "/purchasePlaces",
+        data={"competition": "test_festival", "club": "test_club", "places": ""},
+    )
+    data = response.data.decode()
+    expected_value_club = "Points available: 5"
+    expected_value_competition = "Number of Places: 6"
+    expected_flash_message = "Bad request : number of place must be an integer !"
+    assert response.status_code == 400
+    assert expected_value_club in data
+    assert expected_value_competition in data
+    assert expected_flash_message in data
