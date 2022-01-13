@@ -3,6 +3,8 @@
 import server
 import pytest
 
+from datetime import datetime, timedelta
+
 
 def test_index_should_status_code_ok(client):
     response = client.get("/")
@@ -47,7 +49,7 @@ def test_purchasePlaces_book_more_than_clubs_point_or_competition_places(
         [
             {
                 "name": "test_festival",
-                "date": "2020-03-27 10:00:00",
+                "date": (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S"),
                 "numberOfPlaces": competition_place,
             }
         ],
@@ -74,7 +76,7 @@ def test_purchasePlaces_book_negative_place(client, mocker):
         [
             {
                 "name": "test_festival",
-                "date": "2020-03-27 10:00:00",
+                "date": (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S"),
                 "numberOfPlaces": 5,
             }
         ],
@@ -103,7 +105,7 @@ def test_purchasePlace_without_data(client, mocker):
         [
             {
                 "name": "test_festival",
-                "date": "2020-03-27 10:00:00",
+                "date": (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S"),
                 "numberOfPlaces": 6,
             }
         ],
@@ -122,8 +124,6 @@ def test_purchasePlace_without_data(client, mocker):
     assert expected_flash_message in data
 
 
-# TODO : à déplacer dans les test fonctionnels
-# SUREMEENT PAS UN TEST UNITAIRE => il y a deux actions du client
 def test_purchase_more_than_max_place_per_competition(client, mocker):
     mocker.patch.object(
         server,
@@ -136,7 +136,7 @@ def test_purchase_more_than_max_place_per_competition(client, mocker):
         [
             {
                 "name": "test_festival",
-                "date": "2020-03-27 10:00:00",
+                "date": (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S"),
                 "numberOfPlaces": 15,
             }
         ],
@@ -155,6 +155,39 @@ def test_purchase_more_than_max_place_per_competition(client, mocker):
     assert expected_flash_message in data
 
 
+def test_purchase_past_competition(client, mocker):
+    mocker.patch.object(
+        server,
+        "clubs",
+        [{"name": "test_club", "email": "test@gmail.com", "points": 15}],
+    )
+    mocker.patch.object(
+        server,
+        "competitions",
+        [
+            {
+                "name": "test_festival",
+                "date": (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S"),
+                "numberOfPlaces": 15,
+            }
+        ],
+    )
+    response = client.post(
+        "/purchasePlaces",
+        data={"competition": "test_festival", "club": "test_club", "places": "1"},
+    )
+    data = response.data.decode()
+    expected_value_club = "Points available: 15"
+    expected_value_competition = "Number of Places: 15"
+    expected_flash_message = "Error : you cannot book a place in a past competition !"
+    assert response.status_code == 403
+    assert expected_value_club in data
+    assert expected_value_competition in data
+    assert expected_flash_message in data
+
+
+# TODO : à déplacer dans les test fonctionnels
+# SUREMEENT PAS UN TEST UNITAIRE => il y a deux actions du client
 def test_purchase_more_than_max_place_per_competition_with_2_request(client, mocker):
     mocker.patch.object(
         server,
@@ -167,7 +200,7 @@ def test_purchase_more_than_max_place_per_competition_with_2_request(client, moc
         [
             {
                 "name": "test_festival",
-                "date": "2020-03-27 10:00:00",
+                "date": (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S"),
                 "numberOfPlaces": server.MAX_PLACES * 3,
             }
         ],
@@ -189,7 +222,7 @@ def test_purchase_more_than_max_place_per_competition_with_2_request(client, moc
     expected_flash_message = (
         f"Error : A club can&#39;t reserve more than {server.MAX_PLACES} places to the same competition"
     )
-    print(data)
+
     assert response.status_code == 403
     assert expected_value_club in data
     assert expected_value_competition in data

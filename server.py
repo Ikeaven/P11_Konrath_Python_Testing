@@ -1,5 +1,6 @@
 import json
 import logging
+from datetime import datetime, date
 
 # import logging
 from flask import Flask, render_template, request, redirect, flash, url_for
@@ -64,6 +65,19 @@ def book(competition, club):
 def purchasePlaces():
     competition = [c for c in competitions if c["name"] == request.form["competition"]][0]
     club = [c for c in clubs if c["name"] == request.form["club"]][0]
+
+    # check competition date
+    competition_year = int(competition["date"].split(" ")[0].split("-")[0])
+    competition_month = int(competition["date"].split(" ")[0].split("-")[1])
+    competition_day = int(competition["date"].split(" ")[0].split("-")[2])
+    competition_date = date(competition_year, competition_month, competition_day)
+    today = date(
+        int(datetime.now().strftime("%Y")), int(datetime.now().strftime("%m")), int(datetime.now().strftime("%d"))
+    )
+    if today > competition_date:
+        flash("Error : you cannot book a place in a past competition !")
+        return render_template("welcome.html", club=club, competitions=competitions), 403
+
     try:
         places_required = abs(int(request.form["places"]))
     except ValueError:
