@@ -1,5 +1,10 @@
 import json
+import logging
+
+# import logging
 from flask import Flask, render_template, request, redirect, flash, url_for
+
+from models import Booking
 
 
 def loadClubs():
@@ -14,8 +19,14 @@ def loadCompetitions():
         return listOfCompetitions
 
 
+MAX_PLACES = 12
+
+
 app = Flask(__name__)
+
 app.secret_key = "something_special"
+
+logging.basicConfig(level=logging.INFO)
 
 competitions = loadCompetitions()
 clubs = loadClubs()
@@ -54,15 +65,38 @@ def purchasePlaces():
     competition = [c for c in competitions if c["name"] == request.form["competition"]][0]
     club = [c for c in clubs if c["name"] == request.form["club"]][0]
     try:
-        placesRequired = abs(int(request.form["places"]))
+        places_required = abs(int(request.form["places"]))
     except ValueError:
         flash("Bad request : number of place must be an integer !")
         return render_template("welcome.html", club=club, competitions=competitions), 400
 
-    if placesRequired <= int(club["points"]) and placesRequired <= int(competition["numberOfPlaces"]):
-        competition["numberOfPlaces"] = int(competition["numberOfPlaces"]) - placesRequired
-        club["points"] = int(club["points"]) - placesRequired
-        # TODO: update in JSON File
+    # places_required must be < than club point, < than competition's place, < than MAX_PLACES
+    if (
+        places_required <= int(club["points"])
+        and places_required <= int(competition["numberOfPlaces"])
+        and places_required <= MAX_PLACES
+    ):
+        already_booked = Booking.already_booked(club["name"], competition["name"])
+
+        # Check if club has already book places to this competition
+        if already_booked:
+            logging.info("INFORMATION : the club as already booked place to this competition")
+
+            # Check if passed_book + place_required <= MAX_PLACES
+            if int(already_booked.nb_places_booked) + int(places_required) <= MAX_PLACES:
+                already_booked.nb_places_booked += int(places_required)
+            else:
+                flash(f"Error : A club can't reserve more than {MAX_PLACES} places to the same competition")
+                return render_template("welcome.html", club=club, competitions=competitions), 403
+
+        # It's the first time the club booked places to this competition => init a booking
+        else:
+            logging.info("INFORMATION : Is the first time the club booked places to this competition")
+            Booking(club["name"], competition["name"], places_required)
+
+        # Mise à jour des valeurs club et competition
+        competition["numberOfPlaces"] = int(competition["numberOfPlaces"]) - places_required
+        club["points"] = int(club["points"]) - places_required
         flash("Great-booking complete!")
         return render_template("welcome.html", club=club, competitions=competitions)
     else:

@@ -120,3 +120,77 @@ def test_purchasePlace_without_data(client, mocker):
     assert expected_value_club in data
     assert expected_value_competition in data
     assert expected_flash_message in data
+
+
+# TODO : à déplacer dans les test fonctionnels
+# SUREMEENT PAS UN TEST UNITAIRE => il y a deux actions du client
+def test_purchase_more_than_max_place_per_competition(client, mocker):
+    mocker.patch.object(
+        server,
+        "clubs",
+        [{"name": "test_club", "email": "test@gmail.com", "points": 15}],
+    )
+    mocker.patch.object(
+        server,
+        "competitions",
+        [
+            {
+                "name": "test_festival",
+                "date": "2020-03-27 10:00:00",
+                "numberOfPlaces": 15,
+            }
+        ],
+    )
+    response = client.post(
+        "/purchasePlaces",
+        data={"competition": "test_festival", "club": "test_club", "places": server.MAX_PLACES + 2},
+    )
+    data = response.data.decode()
+    expected_value_club = "Points available: 15"
+    expected_value_competition = "Number of Places: 15"
+    expected_flash_message = "Error : Too much places booked"
+    assert response.status_code == 403
+    assert expected_value_club in data
+    assert expected_value_competition in data
+    assert expected_flash_message in data
+
+
+def test_purchase_more_than_max_place_per_competition_with_2_request(client, mocker):
+    mocker.patch.object(
+        server,
+        "clubs",
+        [{"name": "test_club", "email": "test@gmail.com", "points": server.MAX_PLACES * 3}],
+    )
+    mocker.patch.object(
+        server,
+        "competitions",
+        [
+            {
+                "name": "test_festival",
+                "date": "2020-03-27 10:00:00",
+                "numberOfPlaces": server.MAX_PLACES * 3,
+            }
+        ],
+    )
+    response = client.post(
+        "/purchasePlaces",
+        data={"competition": "test_festival", "club": "test_club", "places": server.MAX_PLACES},
+    )
+
+    # time.sleep(5)
+
+    response2 = client.post(
+        "/purchasePlaces",
+        data={"competition": "test_festival", "club": "test_club", "places": server.MAX_PLACES},
+    )
+    data = response2.data.decode()
+    expected_value_club = f"Points available: {(server.MAX_PLACES * 3)}"
+    expected_value_competition = f"Number of Places: {(server.MAX_PLACES * 3)}"
+    expected_flash_message = (
+        f"Error : A club can&#39;t reserve more than {server.MAX_PLACES} places to the same competition"
+    )
+    print(data)
+    assert response.status_code == 403
+    assert expected_value_club in data
+    assert expected_value_competition in data
+    assert expected_flash_message in data
