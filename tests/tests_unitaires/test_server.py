@@ -11,6 +11,18 @@ def test_index_should_status_code_ok(client):
     assert response.status_code == 200
 
 
+def test_clubs_list_status_code_ok(client):
+    response = client.get("/clubs_list")
+    assert response.status_code == 200
+
+
+def test_clubs_list_content(client):
+    response = client.get("/clubs_list")
+    data = response.data.decode()
+    expected_value = "<ul id='clubs_list'>"
+    assert expected_value in data
+
+
 def test_showSummary_valid_email(client, mocker):
     mocker.patch.object(
         server,

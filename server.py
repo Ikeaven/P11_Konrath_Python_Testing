@@ -38,6 +38,11 @@ def index():
     return render_template("index.html")
 
 
+@app.route("/clubs_list")
+def clubs_list():
+    return render_template("clubs_list.html", clubs=clubs)
+
+
 @app.errorhandler(404)
 @app.route("/showSummary", methods=["POST"])
 def showSummary():
