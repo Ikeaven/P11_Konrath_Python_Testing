@@ -201,6 +201,8 @@ def test_purchase_past_competition(client, mocker):
 # TODO : à déplacer dans les test fonctionnels
 # SUREMEENT PAS UN TEST UNITAIRE => il y a deux actions du client
 def test_purchase_more_than_max_place_per_competition_with_2_request(client, mocker):
+    mocker.patch.object(server, "PRICE_PER_PLACE", 1)
+
     mocker.patch.object(
         server,
         "clubs",
