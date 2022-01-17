@@ -68,7 +68,7 @@ def test_purchasePlaces_book_negative_place(client, mocker):
     mocker.patch.object(
         server,
         "clubs",
-        [{"name": "test_club", "email": "test@gmail.com", "points": 5}],
+        [{"name": "test_club", "email": "test@gmail.com", "points": server.PRICE_PER_PLACE * 2}],
     )
     mocker.patch.object(
         server,
@@ -83,11 +83,11 @@ def test_purchasePlaces_book_negative_place(client, mocker):
     )
     response = client.post(
         "/purchasePlaces",
-        data={"competition": "test_festival", "club": "test_club", "places": "-3"},
+        data={"competition": "test_festival", "club": "test_club", "places": "-1"},
     )
     data = response.data.decode()
-    expected_value_club = "Points available: 2"
-    expected_value_competition = "Number of Places: 2"
+    expected_value_club = f"Points available: {server.PRICE_PER_PLACE}"
+    expected_value_competition = "Number of Places: 4"
     assert response.status_code == 200
     assert expected_value_club in data
     assert expected_value_competition in data

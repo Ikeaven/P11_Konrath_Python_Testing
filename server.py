@@ -21,13 +21,13 @@ def loadCompetitions():
 
 
 MAX_PLACES = 12
-
+PRICE_PER_PLACE = 1
 
 app = Flask(__name__)
 
 app.secret_key = "something_special"
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.ERROR)
 
 competitions = loadCompetitions()
 clubs = loadClubs()
@@ -74,6 +74,7 @@ def purchasePlaces():
     today = date(
         int(datetime.now().strftime("%Y")), int(datetime.now().strftime("%m")), int(datetime.now().strftime("%d"))
     )
+
     if today > competition_date:
         flash("Error : you cannot book a place in a past competition !")
         return render_template("welcome.html", club=club, competitions=competitions), 403
@@ -86,7 +87,7 @@ def purchasePlaces():
 
     # places_required must be < than club point, < than competition's place, < than MAX_PLACES
     if (
-        places_required <= int(club["points"])
+        (places_required * PRICE_PER_PLACE) <= int(club["points"])
         and places_required <= int(competition["numberOfPlaces"])
         and places_required <= MAX_PLACES
     ):
@@ -110,7 +111,7 @@ def purchasePlaces():
 
         # Mise à jour des valeurs club et competition
         competition["numberOfPlaces"] = int(competition["numberOfPlaces"]) - places_required
-        club["points"] = int(club["points"]) - places_required
+        club["points"] = int(club["points"]) - (places_required * PRICE_PER_PLACE)
         flash("Great-booking complete!")
         return render_template("welcome.html", club=club, competitions=competitions)
     else:
