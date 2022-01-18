@@ -1,0 +1,2 @@
+[run]
+omit = tests/*, bin/*, lib/*, plan_de_test.pages/*
