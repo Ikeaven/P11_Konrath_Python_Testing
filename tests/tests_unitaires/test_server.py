@@ -1,4 +1,5 @@
 # from conftest import client
+
 # from server import clubs
 import server
 import pytest
@@ -61,8 +62,10 @@ def test_purchasePlaces_book_more_than_clubs_point_or_competition_places(
         [
             {
                 "name": "test_festival",
-                "date": (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S"),
-                "numberOfPlaces": competition_place,
+                "date": (datetime.now() + timedelta(days=1)).strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                ),
+                "number_of_places": competition_place,
             }
         ],
     )
@@ -80,7 +83,13 @@ def test_purchasePlaces_book_negative_place(client, mocker):
     mocker.patch.object(
         server,
         "clubs",
-        [{"name": "test_club", "email": "test@gmail.com", "points": server.PRICE_PER_PLACE * 2}],
+        [
+            {
+                "name": "test_club",
+                "email": "test@gmail.com",
+                "points": server.PRICE_PER_PLACE * 2,
+            }
+        ],
     )
     mocker.patch.object(
         server,
@@ -88,8 +97,10 @@ def test_purchasePlaces_book_negative_place(client, mocker):
         [
             {
                 "name": "test_festival",
-                "date": (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S"),
-                "numberOfPlaces": 5,
+                "date": (datetime.now() + timedelta(days=1)).strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                ),
+                "number_of_places": 5,
             }
         ],
     )
@@ -117,8 +128,10 @@ def test_purchasePlace_without_data(client, mocker):
         [
             {
                 "name": "test_festival",
-                "date": (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S"),
-                "numberOfPlaces": 6,
+                "date": (datetime.now() + timedelta(days=1)).strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                ),
+                "number_of_places": 6,
             }
         ],
     )
@@ -148,14 +161,20 @@ def test_purchase_more_than_max_place_per_competition(client, mocker):
         [
             {
                 "name": "test_festival",
-                "date": (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S"),
-                "numberOfPlaces": 15,
+                "date": (datetime.now() + timedelta(days=1)).strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                ),
+                "number_of_places": 15,
             }
         ],
     )
     response = client.post(
         "/purchasePlaces",
-        data={"competition": "test_festival", "club": "test_club", "places": server.MAX_PLACES + 2},
+        data={
+            "competition": "test_festival",
+            "club": "test_club",
+            "places": server.MAX_PLACES + 2,
+        },
     )
     data = response.data.decode()
     expected_value_club = "Points available: 15"
@@ -179,8 +198,10 @@ def test_purchase_past_competition(client, mocker):
         [
             {
                 "name": "test_festival",
-                "date": (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S"),
-                "numberOfPlaces": 15,
+                "date": (datetime.now() - timedelta(days=1)).strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                ),
+                "number_of_places": 15,
             }
         ],
     )
@@ -206,7 +227,13 @@ def test_purchase_more_than_max_place_per_competition_with_2_request(client, moc
     mocker.patch.object(
         server,
         "clubs",
-        [{"name": "test_club", "email": "test@gmail.com", "points": server.MAX_PLACES * 3}],
+        [
+            {
+                "name": "test_club",
+                "email": "test@gmail.com",
+                "points": server.MAX_PLACES * 3,
+            }
+        ],
     )
     mocker.patch.object(
         server,
@@ -214,28 +241,36 @@ def test_purchase_more_than_max_place_per_competition_with_2_request(client, moc
         [
             {
                 "name": "test_festival",
-                "date": (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S"),
-                "numberOfPlaces": server.MAX_PLACES * 3,
+                "date": (datetime.now() + timedelta(days=1)).strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                ),
+                "number_of_places": server.MAX_PLACES * 3,
             }
         ],
     )
     response = client.post(
         "/purchasePlaces",
-        data={"competition": "test_festival", "club": "test_club", "places": server.MAX_PLACES},
+        data={
+            "competition": "test_festival",
+            "club": "test_club",
+            "places": server.MAX_PLACES,
+        },
     )
 
     # time.sleep(5)
 
     response2 = client.post(
         "/purchasePlaces",
-        data={"competition": "test_festival", "club": "test_club", "places": server.MAX_PLACES},
+        data={
+            "competition": "test_festival",
+            "club": "test_club",
+            "places": server.MAX_PLACES,
+        },
     )
     data = response2.data.decode()
     expected_value_club = f"Points available: {(server.MAX_PLACES * 3)}"
     expected_value_competition = f"Number of Places: {(server.MAX_PLACES * 3)}"
-    expected_flash_message = (
-        f"Error : A club can&#39;t reserve more than {server.MAX_PLACES} places to the same competition"
-    )
+    expected_flash_message = f"Error : A club can&#39;t reserve more than {server.MAX_PLACES} places to the same competition"
 
     assert response.status_code == 403
     assert expected_value_club in data
