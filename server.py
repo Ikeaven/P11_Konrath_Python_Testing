@@ -21,7 +21,7 @@ def loadCompetitions():
 
 
 MAX_PLACES = 12
-PRICE_PER_PLACE = 1
+PRICE_PER_PLACE = 3
 
 app = Flask(__name__)
 
