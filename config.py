@@ -14,15 +14,18 @@ class Config:
 
 class DevelopmentConfig(Config):
     DEBUG = True
+    DATABASE = os.path.join(basedire, 'data')
 
 
 class TestingConfig(Config):
     TESTING = True
+    DATABASE = os.path.join(basedire, 'data_test')
 
 
 class ProductionConfig(Config):
     DEBUG = False
     TESTING = False
+    DATABASE = os.path.join(basedire, 'data')
 
 
 config = {

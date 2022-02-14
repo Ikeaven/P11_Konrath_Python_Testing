@@ -1,7 +1,7 @@
 # from conftest import client
 
-# from main_views import clubs
-from app.main import views as main_views
+# from views import clubs
+from app.main import views
 import pytest
 
 from datetime import datetime, timedelta
@@ -26,7 +26,7 @@ def test_clubs_list_content(client):
 
 def test_showSummary_valid_email(client, mocker):
     mocker.patch.object(
-        main_views,
+        views,
         "clubs",
         [{"name": "Simply Lift", "email": "test@gmail.com", "points": "13"}],
     )
@@ -36,7 +36,7 @@ def test_showSummary_valid_email(client, mocker):
 
 def test_showSummary_invalide_email(client, mocker):
     mocker.patch.object(
-        main_views,
+        views,
         "clubs",
         [{"name": "Simply Lift", "email": "test@gmail.com", "points": "13"}],
     )
@@ -52,12 +52,12 @@ def test_purchasePlaces_book_more_than_clubs_point_or_competition_places(
     client, mocker, club_place, competition_place
 ):
     mocker.patch.object(
-        main_views,
+        views,
         "clubs",
         [{"name": "test_club", "email": "test@gmail.com", "points": club_place}],
     )
     mocker.patch.object(
-        main_views,
+        views,
         "competitions",
         [
             {
@@ -81,18 +81,18 @@ def test_purchasePlaces_book_more_than_clubs_point_or_competition_places(
 
 def test_purchasePlaces_book_negative_place(client, mocker):
     mocker.patch.object(
-        main_views,
+        views,
         "clubs",
         [
             {
                 "name": "test_club",
                 "email": "test@gmail.com",
-                "points": main_views.PRICE_PER_PLACE * 2,
+                "points": views.PRICE_PER_PLACE * 2,
             }
         ],
     )
     mocker.patch.object(
-        main_views,
+        views,
         "competitions",
         [
             {
@@ -109,7 +109,7 @@ def test_purchasePlaces_book_negative_place(client, mocker):
         data={"competition": "test_festival", "club": "test_club", "places": "-1"},
     )
     data = response.data.decode()
-    expected_value_club = f"Points available: {main_views.PRICE_PER_PLACE}"
+    expected_value_club = f"Points available: {views.PRICE_PER_PLACE}"
     expected_value_competition = "Number of Places: 4"
     assert response.status_code == 200
     assert expected_value_club in data
@@ -118,12 +118,12 @@ def test_purchasePlaces_book_negative_place(client, mocker):
 
 def test_purchasePlace_without_data(client, mocker):
     mocker.patch.object(
-        main_views,
+        views,
         "clubs",
         [{"name": "test_club", "email": "test@gmail.com", "points": 5}],
     )
     mocker.patch.object(
-        main_views,
+        views,
         "competitions",
         [
             {
@@ -151,12 +151,12 @@ def test_purchasePlace_without_data(client, mocker):
 
 def test_purchase_more_than_max_place_per_competition(client, mocker):
     mocker.patch.object(
-        main_views,
+        views,
         "clubs",
         [{"name": "test_club", "email": "test@gmail.com", "points": 15}],
     )
     mocker.patch.object(
-        main_views,
+        views,
         "competitions",
         [
             {
@@ -173,7 +173,7 @@ def test_purchase_more_than_max_place_per_competition(client, mocker):
         data={
             "competition": "test_festival",
             "club": "test_club",
-            "places": main_views.MAX_PLACES + 2,
+            "places": views.MAX_PLACES + 2,
         },
     )
     data = response.data.decode()
@@ -188,12 +188,12 @@ def test_purchase_more_than_max_place_per_competition(client, mocker):
 
 def test_purchase_past_competition(client, mocker):
     mocker.patch.object(
-        main_views,
+        views,
         "clubs",
         [{"name": "test_club", "email": "test@gmail.com", "points": 15}],
     )
     mocker.patch.object(
-        main_views,
+        views,
         "competitions",
         [
             {
@@ -222,21 +222,21 @@ def test_purchase_past_competition(client, mocker):
 # TODO : à déplacer dans les test fonctionnels
 # SUREMEENT PAS UN TEST UNITAIRE => il y a deux actions du client
 def test_purchase_more_than_max_place_per_competition_with_2_request(client, mocker):
-    mocker.patch.object(main_views, "PRICE_PER_PLACE", 1)
+    mocker.patch.object(views, "PRICE_PER_PLACE", 1)
 
     mocker.patch.object(
-        main_views,
+        views,
         "clubs",
         [
             {
                 "name": "test_club",
                 "email": "test@gmail.com",
-                "points": main_views.MAX_PLACES * 3,
+                "points": views.MAX_PLACES * 3,
             }
         ],
     )
     mocker.patch.object(
-        main_views,
+        views,
         "competitions",
         [
             {
@@ -244,7 +244,7 @@ def test_purchase_more_than_max_place_per_competition_with_2_request(client, moc
                 "date": (datetime.now() + timedelta(days=1)).strftime(
                     "%Y-%m-%d %H:%M:%S"
                 ),
-                "number_of_places": main_views.MAX_PLACES * 3,
+                "number_of_places": views.MAX_PLACES * 3,
             }
         ],
     )
@@ -253,7 +253,7 @@ def test_purchase_more_than_max_place_per_competition_with_2_request(client, moc
         data={
             "competition": "test_festival",
             "club": "test_club",
-            "places": main_views.MAX_PLACES,
+            "places": views.MAX_PLACES,
         },
     )
 
@@ -264,13 +264,13 @@ def test_purchase_more_than_max_place_per_competition_with_2_request(client, moc
         data={
             "competition": "test_festival",
             "club": "test_club",
-            "places": main_views.MAX_PLACES,
+            "places": views.MAX_PLACES,
         },
     )
     data = response2.data.decode()
-    expected_value_club = f"Points available: {(main_views.MAX_PLACES * 3)}"
-    expected_value_competition = f"Number of Places: {(main_views.MAX_PLACES * 3)}"
-    expected_flash_message = f"Error : A club can&#39;t reserve more than {main_views.MAX_PLACES} places to the same competition"
+    expected_value_club = f"Points available: {(views.MAX_PLACES * 3)}"
+    expected_value_competition = f"Number of Places: {(views.MAX_PLACES * 3)}"
+    expected_flash_message = f"Error : A club can&#39;t reserve more than {views.MAX_PLACES} places to the same competition"
 
     assert response.status_code == 403
     assert expected_value_club in data

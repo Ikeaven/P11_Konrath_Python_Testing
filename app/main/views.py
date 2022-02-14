@@ -17,17 +17,26 @@ def index():
     return render_template("index.html")
 
 
+def check_email(email):
+    try:
+        club = [club for club in clubs if club["email"] == email][0]
+    except IndexError:
+        return None
+    return club
+
+
 @main.errorhandler(404)
 @main.route("/showSummary", methods=["POST"])
 def show_summary():
-    try:
-        club = [club for club in clubs if club["email"] == request.form["email"]][0]
-    except IndexError:
+    club = check_email(request.form["email"])
+    if club:
+        return render_template("welcome.html", club=club, competitions=competitions)
+    else:
         return render_template("index.html", error="Unknown Email"), 404
-    return render_template("welcome.html", club=club, competitions=competitions)
+    # return render_template("welcome.html", club=club, competitions=competitions)
 
 
-@main.route("/book/<competition>/<club>")
+@ main.route("/book/<competition>/<club>")
 def book(competition, club):
     found_club = [c for c in clubs if c["name"] == club][0]
     found_competition = [c for c in competitions if c["name"] == competition][0]
@@ -40,9 +49,9 @@ def book(competition, club):
         return render_template("welcome.html", club=club, competitions=competitions)
 
 
-@main.errorhandler(400)
-@main.errorhandler(403)
-@main.route("/purchasePlaces", methods=["POST"])
+@ main.errorhandler(400)
+@ main.errorhandler(403)
+@ main.route("/purchasePlaces", methods=["POST"])
 def purchase_places():
     competition = [c for c in competitions if c["name"] == request.form["competition"]][
         0
