@@ -9,3 +9,5 @@ pyvenv.cfg
 .flake8
 plan_de_test.pages
 pyproject.toml
+env/
+.pytest_cache/
