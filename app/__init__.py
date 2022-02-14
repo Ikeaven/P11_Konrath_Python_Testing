@@ -1,6 +1,9 @@
-from flask import Flask, render_template, request, redirect, flash, url_for
-
+from flask import Flask
 from config import config
+from .load_data_from_json import load_competitions, load_clubs
+
+competitions = load_competitions()
+clubs = load_clubs()
 
 
 def create_app(config_name):
@@ -10,5 +13,8 @@ def create_app(config_name):
 
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
+
+    from .public_board import public_board as public_board_blueprint
+    app.register_blueprint(public_board_blueprint)
 
     return app

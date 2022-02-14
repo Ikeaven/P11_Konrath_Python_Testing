@@ -1,47 +1,20 @@
-import json
 import logging
 from datetime import datetime, date
 
-# import logging
 from flask import render_template, request, redirect, flash, url_for
 from . import main
 
 from ..models import Booking
-
-
-def load_clubs():
-    with open("clubs.json") as c:
-        listOfClubs = json.load(c)["clubs"]
-        return listOfClubs
-
-
-def load_competitions():
-    with open("competitions.json") as comps:
-        list_of_competitions = json.load(comps)["competitions"]
-        return list_of_competitions
+from .. import competitions, clubs
 
 
 MAX_PLACES = 12
 PRICE_PER_PLACE = 3
 
-# app = Flask(__name__)
-
-# app.secret_key = "something_special"
-
-# logging.basicConfig(level=logging.ERROR)
-
-competitions = load_competitions()
-clubs = load_clubs()
-
 
 @main.route("/")
 def index():
     return render_template("index.html")
-
-
-@main.route("/clubs_list")
-def clubs_list():
-    return render_template("clubs_list.html", clubs=clubs)
 
 
 @main.errorhandler(404)
