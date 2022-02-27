@@ -12,4 +12,4 @@ class ProjectPerfTest(HttpUser):
 
     @task
     def test_showSummary(self):
-        self.client.post("/showSummary", {"email": "john@simplylift.co"})
+        self.client.post("/showSummary", {"email": "test@test.com"})
