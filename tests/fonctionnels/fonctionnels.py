@@ -28,4 +28,4 @@ def test_logout():
 
         driver.close()
     else:
-        print('NOT IN TESTING MODE')
+        assert False
