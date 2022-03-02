@@ -13,3 +13,12 @@ class ProjectPerfTest(HttpUser):
     @task
     def test_showSummary(self):
         self.client.post("/showSummary", {"email": "test@test.com"})
+
+    @task
+    def test_purchase_places(self):
+        data = {
+            'club': "client_test",
+            'competition': "Fall Classic",
+            'places': 1
+        }
+        self.client.post("/purchasePlaces", data)

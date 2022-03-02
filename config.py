@@ -15,17 +15,20 @@ class Config:
 class DevelopmentConfig(Config):
     DEBUG = True
     DATABASE = os.path.join(basedire, 'data')
+    MAX_PLACES = 12
 
 
 class TestingConfig(Config):
     TESTING = True
     DATABASE = os.path.join(basedire, 'data_test')
+    MAX_PLACES = 600
 
 
 class ProductionConfig(Config):
     DEBUG = False
     TESTING = False
     DATABASE = os.path.join(basedire, 'data')
+    MAX_PLACES = 12
 
 
 config = {

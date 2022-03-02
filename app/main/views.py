@@ -5,10 +5,9 @@ from flask import render_template, request, redirect, flash, url_for
 from . import main
 
 from ..models import Booking
-from .. import competitions, clubs
+from .. import competitions, clubs, MAX_PLACES
 
 
-MAX_PLACES = 12
 PRICE_PER_PLACE = 3
 
 

@@ -1,4 +1,5 @@
-from flask import Flask
+from flask import Flask, current_app
+
 from config import config
 from .load_data_from_json import load_competitions, load_clubs
 
@@ -13,6 +14,9 @@ def create_app(config_name):
         competitions = load_competitions()
         global clubs
         clubs = load_clubs()
+
+        global MAX_PLACES
+        MAX_PLACES = current_app.config['MAX_PLACES']
 
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
