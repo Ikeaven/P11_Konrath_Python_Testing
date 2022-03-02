@@ -8,7 +8,7 @@ from server import app
 def test_logout():
     if app.testing:
         print(app.testing)
-        service = Service("tests/fonctionnels/chromedriver")
+        service = Service("./chromedriver")
         driver = webdriver.Chrome(service=service)
         driver.get("http://127.0.0.1:5000/")
 
